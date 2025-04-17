@@ -2,49 +2,127 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'note_page.dart';
+import 'settings_page.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  // 主题模式，默认跟随系统
+  ThemeMode _themeMode = ThemeMode.system;
+
+  void setThemeMode(ThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '考研神器',
+      themeMode: _themeMode,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF5E35B1),
+        colorScheme: ColorScheme(
           brightness: Brightness.light,
+          primary: Color(0xFF3F51B5),
+          onPrimary: Colors.white,
+          secondary: Color(0xFF7986CB),
+          onSecondary: Colors.white,
+          error: Color(0xFFB00020),
+          onError: Colors.white,
+          background: Color(0xFFF7F7F7),
+          onBackground: Colors.black87,
+          surface: Colors.white,
+          onSurface: Colors.black87,
         ),
         useMaterial3: true,
         fontFamily: 'Microsoft YaHei',
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontSize: 16.0, color: Colors.black87),
+          bodyMedium: TextStyle(fontSize: 14.0, color: Colors.black87),
+          bodySmall: TextStyle(fontSize: 12.0, color: Colors.black54),
+        ),
         cardTheme: CardTheme(
-          elevation: 2,
+          elevation: 3,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          color: Colors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            elevation: 2,
+            elevation: 3,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            backgroundColor: Color(0xFF3F51B5),
+            foregroundColor: Colors.white,
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           filled: true,
-          fillColor: Colors.grey.shade50,
+          fillColor: Color(0xFFF0F0F0),
         ),
       ),
-      home: const ExamMasterHomePage(),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme(
+          brightness: Brightness.dark,
+          primary: Color(0xFF90CAF9),
+          onPrimary: Colors.black87,
+          secondary: Color(0xFF64B5F6),
+          onSecondary: Colors.black87,
+          error: Color(0xFFCF6679),
+          onError: Colors.black87,
+          background: Color(0xFF121212),
+          onBackground: Colors.white70,
+          surface: Color(0xFF1E1E1E),
+          onSurface: Colors.white70,
+        ),
+        useMaterial3: true,
+        fontFamily: 'Microsoft YaHei',
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(fontSize: 16.0, color: Colors.white70),
+          bodyMedium: TextStyle(fontSize: 14.0, color: Colors.white70),
+          bodySmall: TextStyle(fontSize: 12.0, color: Colors.white60),
+        ),
+        cardTheme: CardTheme(
+          elevation: 4,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          color: Color(0xFF2C2C2C),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            elevation: 4,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            backgroundColor: Color(0xFF90CAF9),
+            foregroundColor: Colors.black87,
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          filled: true,
+          fillColor: Color(0xFF3A3A3A),
+        ),
+      ),
+      home: ExamMasterHomePage(
+        onThemeModeChanged: setThemeMode,
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
+
 class ExamMasterHomePage extends StatefulWidget {
-  const ExamMasterHomePage({super.key});
+  final void Function(ThemeMode)? onThemeModeChanged;
+
+  const ExamMasterHomePage({super.key, this.onThemeModeChanged});
 
   @override
   State<ExamMasterHomePage> createState() => _ExamMasterHomePageState();
@@ -384,13 +462,14 @@ class _ExamMasterHomePageState extends State<ExamMasterHomePage> {
 
   // 左侧列表
   Widget _buildSidebar() {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: 220,
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: isDark ? Color(0xFF121212) : Colors.grey[50],
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: isDark ? Colors.black54 : Colors.black.withOpacity(0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -415,15 +494,18 @@ class _ExamMasterHomePageState extends State<ExamMasterHomePage> {
                   subject,
                   style: TextStyle(
                     fontWeight: selectedSubject == subject ? FontWeight.bold : FontWeight.normal,
+                    color: isDark ? Colors.white70 : Colors.black87,
                   ),
                 ),
                 selected: selectedSubject == subject,
-                selectedTileColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                selectedTileColor: isDark
+                    ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.4)
+                    : Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
                 leading: Icon(
                   _getSubjectIcon(subject),
                   color: selectedSubject == subject
                       ? Theme.of(context).colorScheme.primary
-                      : Colors.grey[600],
+                      : (isDark ? Colors.white54 : Colors.grey[600]),
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -467,21 +549,24 @@ class _ExamMasterHomePageState extends State<ExamMasterHomePage> {
                       subject,
                       style: TextStyle(
                         fontWeight: selectedSubject == subject ? FontWeight.bold : FontWeight.normal,
+                        color: isDark ? Colors.white70 : Colors.black87,
                       ),
                     ),
                     selected: selectedSubject == subject,
-                    selectedTileColor: Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
+                    selectedTileColor: isDark
+                        ? Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.4)
+                        : Theme.of(context).colorScheme.secondaryContainer.withOpacity(0.3),
                     leading: Icon(
                       Icons.book,
                       color: selectedSubject == subject
                           ? Theme.of(context).colorScheme.secondary
-                          : Colors.grey[600],
+                          : (isDark ? Colors.white54 : Colors.grey[600]),
                     ),
                     trailing: IconButton(
                       icon: Icon(
                         Icons.delete_outline,
                         size: 20,
-                        color: Colors.grey[600],
+                        color: isDark ? Colors.white54 : Colors.grey[600],
                       ),
                       onPressed: () {
                         setState(() {
@@ -547,7 +632,7 @@ class _ExamMasterHomePageState extends State<ExamMasterHomePage> {
                             onPressed: () => Navigator.pop(context, controller.text),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: colorScheme.secondary,
-                              foregroundColor: colorScheme.onSecondary,
+                              foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
                             child: const Text('添加'),
@@ -601,6 +686,28 @@ class _ExamMasterHomePageState extends State<ExamMasterHomePage> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
         elevation: 2,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: '设置',
+            onPressed: () async {
+              if (widget.onThemeModeChanged == null) return;
+              final selectedMode = await Navigator.push<ThemeMode>(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingsPage(
+                    currentMode: Theme.of(context).brightness == Brightness.dark
+                        ? ThemeMode.dark
+                        : ThemeMode.light,
+                  ),
+                ),
+              );
+              if (selectedMode != null) {
+                widget.onThemeModeChanged!(selectedMode);
+              }
+            },
+          ),
+        ],
       ),
       body: Row(
         children: [
@@ -609,7 +716,7 @@ class _ExamMasterHomePageState extends State<ExamMasterHomePage> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: Theme.of(context).colorScheme.background,
               ),
               child: selectedSubject == null
                   ? _buildWelcome()

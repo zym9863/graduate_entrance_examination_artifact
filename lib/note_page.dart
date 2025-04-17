@@ -467,7 +467,9 @@ class _NotePageState extends State<NotePage> {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      color: Colors.black87,
+                                      color: Theme.of(context).brightness == Brightness.dark
+                                          ? Colors.white70
+                                          : Colors.black87,
                                       height: 1.3,
                                     ),
                                   ),
