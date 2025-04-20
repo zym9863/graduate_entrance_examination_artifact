@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'ai_response_page.dart';
 
 class NotePage extends StatefulWidget {
   final String subject;
@@ -272,6 +273,20 @@ class _NotePageState extends State<NotePage> {
     );
   }
 
+  // 打开AI响应页面
+  void _openAiResponse(Map<String, dynamic> note) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AiResponsePage(
+          subject: widget.subject,
+          point: widget.point,
+          noteTitle: note['title'],
+        ),
+      ),
+    );
+  }
+
   // 查看笔记详情
   void _viewNoteDetail(Map<String, dynamic> note) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -487,6 +502,11 @@ class _NotePageState extends State<NotePage> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  IconButton(
+                                    icon: Icon(Icons.smart_toy_outlined, color: Colors.purple),
+                                    tooltip: 'AI解析',
+                                    onPressed: () => _openAiResponse(note),
+                                  ),
                                   IconButton(
                                     icon: Icon(Icons.edit_outlined, color: secondaryColor),
                                     tooltip: '编辑笔记',
