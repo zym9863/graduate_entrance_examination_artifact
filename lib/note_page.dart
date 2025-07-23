@@ -224,7 +224,6 @@ class _NotePageState extends State<NotePage> {
 
   // 删除笔记
   void _deleteNote(int index) {
-    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> {
           bodyMedium: TextStyle(fontSize: 14.0, color: Colors.black87),
           bodySmall: TextStyle(fontSize: 12.0, color: Colors.black54),
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 3,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           color: Colors.white,
@@ -91,7 +91,7 @@ class _MyAppState extends State<MyApp> {
           bodyMedium: TextStyle(fontSize: 14.0, color: Colors.white70),
           bodySmall: TextStyle(fontSize: 12.0, color: Colors.white60),
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 4,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           color: Color(0xFF2C2C2C),
