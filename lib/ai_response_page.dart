@@ -477,12 +477,14 @@ class _AiResponsePageState extends State<AiResponsePage>
           ),
           SliverPadding(
             padding: EdgeInsets.all(16),
-            sliver: SliverFillRemaining(
-              child: _isLoading
-                  ? _buildLoadingAnimation()
-                  : _errorMessage.isNotEmpty
-                      ? _buildErrorState()
-                      : _buildResponseContent(),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                _isLoading
+                    ? _buildLoadingAnimation()
+                    : _errorMessage.isNotEmpty
+                        ? _buildErrorState()
+                        : _buildResponseContent(),
+              ]),
             ),
           ),
         ],
