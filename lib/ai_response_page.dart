@@ -74,7 +74,7 @@ class _AiResponsePageState extends State<AiResponsePage> {
           'messages': [
             {'role': 'user', 'content': prompt},
           ],
-          'model': 'gemini',
+          'model': 'openai-large',
           'private': true, // 响应不会出现在公共feed中
         }),
       );
