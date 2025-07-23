@@ -24,7 +24,6 @@ class _NotePageState extends State<NotePage> {
     _loadNotes();
   }
 
-  // 加载笔记数据
   Future<void> _loadNotes() async {
     final prefs = await SharedPreferences.getInstance();
     final notesString = prefs.getString('${keyNotes}_${widget.subject}_${widget.point}');
@@ -36,14 +35,12 @@ class _NotePageState extends State<NotePage> {
     }
   }
 
-  // 保存笔记数据
   Future<void> _saveNotes() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
         '${keyNotes}_${widget.subject}_${widget.point}', json.encode(notes));
   }
 
-  // 添加笔记
   Future<void> _addNote() async {
     final result = await showDialog<Map<String, String>>(
       context: context,
@@ -52,9 +49,22 @@ class _NotePageState extends State<NotePage> {
         final contentController = TextEditingController();
         final colorScheme = Theme.of(context).colorScheme;
         return AlertDialog(
-          title: Text(
-            '添加笔记',
-            style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+          title: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.add_rounded, color: colorScheme.primary, size: 20),
+              ),
+              SizedBox(width: 12),
+              Text(
+                '添加笔记',
+                style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -67,13 +77,8 @@ class _NotePageState extends State<NotePage> {
                   controller: titleController,
                   decoration: InputDecoration(
                     labelText: '标题',
-                    labelStyle: TextStyle(color: colorScheme.primary),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
-                    ),
-                    prefixIcon: Icon(Icons.title, color: colorScheme.primary),
+                    hintText: '输入笔记标题',
+                    prefixIcon: Icon(Icons.title_rounded, color: colorScheme.primary),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -81,13 +86,9 @@ class _NotePageState extends State<NotePage> {
                   controller: contentController,
                   decoration: InputDecoration(
                     labelText: '内容',
-                    labelStyle: TextStyle(color: colorScheme.primary),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
-                    ),
-                    prefixIcon: Icon(Icons.note, color: colorScheme.primary),
+                    hintText: '输入笔记内容',
+                    prefixIcon: Icon(Icons.edit_note_rounded, color: colorScheme.primary),
+                    alignLabelWithHint: true,
                   ),
                   maxLines: 5,
                 ),
@@ -97,19 +98,18 @@ class _NotePageState extends State<NotePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(foregroundColor: Colors.grey[700]),
-              child: const Text('取消'),
+              child: Text('取消'),
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, {
-                'title': titleController.text,
-                'content': contentController.text,
-              }),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.secondary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
+            FilledButton(
+              onPressed: () {
+                if (titleController.text.trim().isNotEmpty &&
+                    contentController.text.trim().isNotEmpty) {
+                  Navigator.pop(context, {
+                    'title': titleController.text.trim(),
+                    'content': contentController.text.trim(),
+                  });
+                }
+              },
               child: const Text('添加'),
             ),
           ],
@@ -118,13 +118,11 @@ class _NotePageState extends State<NotePage> {
       },
     );
 
-    if (result != null &&
-        result['title']!.trim().isNotEmpty &&
-        result['content']!.trim().isNotEmpty) {
+    if (result != null) {
       setState(() {
         notes.add({
-          'title': result['title']!.trim(),
-          'content': result['content']!.trim(),
+          'title': result['title']!,
+          'content': result['content']!,
           'date': DateTime.now().toString(),
         });
       });
@@ -132,7 +130,6 @@ class _NotePageState extends State<NotePage> {
     }
   }
 
-  // 编辑笔记
   Future<void> _editNote(int index) async {
     final note = notes[index];
     final result = await showDialog<Map<String, String>>(
@@ -142,9 +139,22 @@ class _NotePageState extends State<NotePage> {
         final contentController = TextEditingController(text: note['content']);
         final colorScheme = Theme.of(context).colorScheme;
         return AlertDialog(
-          title: Text(
-            '编辑笔记',
-            style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+          title: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(Icons.edit_outlined, color: colorScheme.primary, size: 20),
+              ),
+              SizedBox(width: 12),
+              Text(
+                '编辑笔记',
+                style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -157,13 +167,7 @@ class _NotePageState extends State<NotePage> {
                   controller: titleController,
                   decoration: InputDecoration(
                     labelText: '标题',
-                    labelStyle: TextStyle(color: colorScheme.primary),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
-                    ),
-                    prefixIcon: Icon(Icons.title, color: colorScheme.primary),
+                    prefixIcon: Icon(Icons.title_rounded, color: colorScheme.primary),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -171,13 +175,8 @@ class _NotePageState extends State<NotePage> {
                   controller: contentController,
                   decoration: InputDecoration(
                     labelText: '内容',
-                    labelStyle: TextStyle(color: colorScheme.primary),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: colorScheme.primary, width: 2),
-                    ),
-                    prefixIcon: Icon(Icons.note, color: colorScheme.primary),
+                    prefixIcon: Icon(Icons.edit_note_rounded, color: colorScheme.primary),
+                    alignLabelWithHint: true,
                   ),
                   maxLines: 5,
                 ),
@@ -187,19 +186,18 @@ class _NotePageState extends State<NotePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(foregroundColor: Colors.grey[700]),
-              child: const Text('取消'),
+              child: Text('取消'),
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, {
-                'title': titleController.text,
-                'content': contentController.text,
-              }),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.secondary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
+            FilledButton(
+              onPressed: () {
+                if (titleController.text.trim().isNotEmpty &&
+                    contentController.text.trim().isNotEmpty) {
+                  Navigator.pop(context, {
+                    'title': titleController.text.trim(),
+                    'content': contentController.text.trim(),
+                  });
+                }
+              },
               child: const Text('保存'),
             ),
           ],
@@ -208,71 +206,66 @@ class _NotePageState extends State<NotePage> {
       },
     );
 
-    if (result != null &&
-        result['title']!.trim().isNotEmpty &&
-        result['content']!.trim().isNotEmpty) {
+    if (result != null) {
       setState(() {
         notes[index] = {
-          'title': result['title']!.trim(),
-          'content': result['content']!.trim(),
-          'date': note['date'], // 保留原创建日期
+          'title': result['title']!,
+          'content': result['content']!,
+          'date': note['date'],
         };
       });
       _saveNotes();
     }
   }
 
-  // 删除笔记
-  void _deleteNote(int index) {
-    showDialog(
+  Future<void> _deleteNote(int index) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          '确认删除',
-          style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.bold),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
+        title: Row(
           children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: Colors.amber,
-              size: 48,
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.warning_rounded, 
+                color: Theme.of(context).colorScheme.error, 
+                size: 20,
+              ),
             ),
-            const SizedBox(height: 16),
-            const Text('确定要删除这条笔记吗？'),
-            const Text('删除后将无法恢复', style: TextStyle(color: Colors.grey, fontSize: 12)),
+            SizedBox(width: 12),
+            Text('确认删除'),
           ],
         ),
+        content: Text('确定要删除这条笔记吗？此操作不可恢复。'),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(foregroundColor: Colors.grey[700]),
-            child: const Text('取消'),
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('取消'),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                notes.removeAt(index);
-              });
-              _saveNotes();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
-            child: const Text('删除'),
+            child: Text('删除'),
           ),
         ],
-        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       ),
     );
+    
+    if (confirmed == true) {
+      setState(() {
+        notes.removeAt(index);
+      });
+      _saveNotes();
+    }
   }
 
-  // 打开AI响应页面
   void _openAiResponse(Map<String, dynamic> note) {
     Navigator.push(
       context,
@@ -286,20 +279,35 @@ class _NotePageState extends State<NotePage> {
     );
   }
 
-  // 查看笔记详情
   void _viewNoteDetail(Map<String, dynamic> note) {
     final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          note['title'],
-          style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+        title: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(Icons.note_alt_rounded, color: colorScheme.primary, size: 20),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                note['title'],
+                style: TextStyle(color: colorScheme.primary, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
         content: Container(
           width: double.maxFinite,
+          constraints: BoxConstraints(maxHeight: 400),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,23 +316,27 @@ class _NotePageState extends State<NotePage> {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: colorScheme.primary.withOpacity(0.2)),
+                    color: colorScheme.surfaceVariant.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
                   ),
                   child: Text(
                     note['content'],
-                    style: const TextStyle(fontSize: 16, height: 1.5),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(height: 1.6),
                   ),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Icon(Icons.access_time, size: 14, color: Colors.grey[600]),
-                    const SizedBox(width: 4),
-                    Text(
-                      '创建时间: ${DateTime.parse(note['date']).toLocal().toString().split('.')[0]}',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    Icon(Icons.schedule_rounded, size: 16, color: colorScheme.outline),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '创建时间：${_formatDate(note['date'])}',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: colorScheme.outline,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -333,15 +345,10 @@ class _NotePageState extends State<NotePage> {
           ),
         ),
         actions: [
-          ElevatedButton.icon(
+          FilledButton.icon(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.check_circle_outline),
+            icon: const Icon(Icons.close_rounded, size: 18),
             label: const Text('关闭'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: colorScheme.secondary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
           ),
         ],
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -349,60 +356,225 @@ class _NotePageState extends State<NotePage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // 获取主题颜色
-    final colorScheme = Theme.of(context).colorScheme;
-    final primaryColor = colorScheme.primary;
-    final secondaryColor = colorScheme.secondary;
+  String _formatDate(String dateString) {
+    final date = DateTime.parse(dateString);
+    final now = DateTime.now();
+    final difference = now.difference(date);
     
-    // 根据搜索关键字过滤笔记
-    final filteredNotes = searchKeyword.isEmpty
-        ? notes
-        : notes
-            .where((note) =>
-                note['title'].toString().contains(searchKeyword) ||
-                note['content'].toString().contains(searchKeyword))
-            .toList();
+    if (difference.inDays == 0) {
+      return '今天 ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } else if (difference.inDays == 1) {
+      return '昨天 ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}天前';
+    } else {
+      return '${date.month}月${date.day}日';
+    }
+  }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '${widget.subject} - ${widget.point}',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: primaryColor,
-        elevation: 2,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(16),
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(32),
+            ),
+            child: Icon(
+              Icons.note_add_rounded,
+              size: 80,
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            ),
+          ),
+          SizedBox(height: 32),
+          Text(
+            searchKeyword.isEmpty ? '还没有笔记' : '没有找到相关笔记',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            searchKeyword.isEmpty ? '点击右下角按钮添加第一条笔记' : '尝试使用其他关键词搜索',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoteCard(Map<String, dynamic> note, int index) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      child: Card(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () => _viewNoteDetail(note),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.note_alt_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 16,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        note['title'],
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12),
+                Text(
+                  note['content'],
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                    height: 1.5,
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.schedule_rounded,
+                      size: 14,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    SizedBox(width: 4),
+                    Text(
+                      _formatDate(note['date']),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                    Spacer(),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.psychology_rounded,
+                            color: Theme.of(context).colorScheme.tertiary,
+                            size: 20,
+                          ),
+                          tooltip: 'AI智能解析',
+                          onPressed: () => _openAiResponse(note),
+                          constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                          padding: EdgeInsets.all(4),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.edit_outlined,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 20,
+                          ),
+                          tooltip: '编辑笔记',
+                          onPressed: () => _editNote(index),
+                          constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                          padding: EdgeInsets.all(4),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.delete_outline_rounded,
+                            color: Theme.of(context).colorScheme.error,
+                            size: 20,
+                          ),
+                          tooltip: '删除笔记',
+                          onPressed: () => _deleteNote(index),
+                          constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                          padding: EdgeInsets.all(4),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white,
-              colorScheme.primaryContainer.withOpacity(0.2),
-            ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredNotes = searchKeyword.isEmpty
+        ? notes
+        : notes.where((note) =>
+            note['title'].toString().toLowerCase().contains(searchKeyword.toLowerCase()) ||
+            note['content'].toString().toLowerCase().contains(searchKeyword.toLowerCase()))
+          .toList();
+
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 120,
+            floating: false,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                '${widget.subject} - ${widget.point}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+              background: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.secondary,
+                    ],
+                  ),
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.1),
+                  ),
+                ),
+              ),
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            // 搜索框
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+          SliverToBoxAdapter(
+            child: Container(
+              padding: EdgeInsets.all(16),
               child: TextField(
                 decoration: InputDecoration(
                   labelText: '搜索笔记',
-                  labelStyle: TextStyle(color: primaryColor),
-                  prefixIcon: Icon(Icons.search, color: primaryColor),
+                  hintText: '输入关键词搜索笔记内容',
+                  prefixIcon: Icon(Icons.search_rounded),
                   suffixIcon: searchKeyword.isNotEmpty
                       ? IconButton(
-                          icon: const Icon(Icons.clear),
+                          icon: Icon(Icons.clear_rounded),
                           onPressed: () {
                             setState(() {
                               searchKeyword = '';
@@ -410,17 +582,6 @@ class _NotePageState extends State<NotePage> {
                           },
                         )
                       : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: primaryColor.withOpacity(0.5)),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: primaryColor, width: 2),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -429,113 +590,35 @@ class _NotePageState extends State<NotePage> {
                 },
               ),
             ),
-            // 笔记列表
-            Expanded(
-              child: filteredNotes.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.note_alt_outlined,
-                            size: 64,
-                            color: primaryColor.withOpacity(0.5),
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            '暂无笔记，点击右下角按钮添加',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: ListView.builder(
-                        itemCount: filteredNotes.length,
-                        itemBuilder: (context, index) {
-                          final note = filteredNotes[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 6.0),
-                            elevation: 3,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0, vertical: 8.0),
-                              title: Text(
-                                note['title'],
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    note['content'],
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: Theme.of(context).brightness == Brightness.dark
-                                          ? Colors.white70
-                                          : Colors.black87,
-                                      height: 1.3,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '创建于: ${DateTime.parse(note['date']).toLocal().toString().split(' ')[0]}',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              onTap: () => _viewNoteDetail(note),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.smart_toy_outlined, color: Colors.purple),
-                                    tooltip: 'AI解析',
-                                    onPressed: () => _openAiResponse(note),
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.edit_outlined, color: secondaryColor),
-                                    tooltip: '编辑笔记',
-                                    onPressed: () => _editNote(
-                                        notes.indexOf(note)), // 使用原始列表的索引
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete_outline, color: Colors.redAccent),
-                                    tooltip: '删除笔记',
-                                    onPressed: () => _deleteNote(
-                                        notes.indexOf(note)), // 使用原始列表的索引
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+          ),
+          SliverPadding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            sliver: filteredNotes.isEmpty
+                ? SliverFillRemaining(
+                    child: _buildEmptyState(),
+                  )
+                : SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final note = filteredNotes[index];
+                        final originalIndex = notes.indexOf(note);
+                        return _buildNoteCard(note, originalIndex);
+                      },
+                      childCount: filteredNotes.length,
                     ),
-            ),
-          ],
-        ),
+                  ),
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(height: 100),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addNote,
         tooltip: '添加笔记',
-        icon: const Icon(Icons.add),
-        label: const Text('添加笔记'),
-        backgroundColor: secondaryColor,
-        elevation: 4,
+        icon: Icon(Icons.add_rounded),
+        label: Text('添加笔记'),
+        elevation: 6,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
